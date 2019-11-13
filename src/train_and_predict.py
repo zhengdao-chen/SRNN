@@ -56,11 +56,11 @@ def partial_H_partial_p(p, q, H):
 #     #     p_0_var = Variable(p_0, volatile=volatile, requires_grad=requires_grad)
 #     #     q_0_var = Variable(q_0, volatile=volatile, requires_grad=requires_grad)
 
-    
+
 #     # trajectories = Variable(torch.Tensor(T, p_0.shape[0], 2 * p_0.shape[1]),
 #     #         volatile=volatile)
 #     trajectories = torch.zeros((T, p_0.shape[0], 2 * p_0.shape[1]), requires_grad = not volatile).to(device)
-    
+
 #     # p = p_0_var
 #     # q = q_0_var
 
@@ -68,7 +68,7 @@ def partial_H_partial_p(p, q, H):
 #     q = q_0
 #     p.requires_grad_()
 #     q.requires_grad_()
-    
+
 #     if is_Hamilt:
 #         accel = calculate_acceleration(p, q, Func)
 
@@ -205,12 +205,12 @@ def leapfrog_stack(p_0, q_0, Func, T, dt, volatile=True, is_Hamilt=True, device=
     #     p_0_var = Variable(p_0, volatile=volatile, requires_grad=requires_grad)
     #     q_0_var = Variable(q_0, volatile=volatile, requires_grad=requires_grad)
 
-    
+
     # trajectories = Variable(torch.Tensor(T, p_0.shape[0], 2 * p_0.shape[1]),
     #         volatile=volatile)
     # trajectories = torch.zeros((T, p_0.shape[0], 2 * p_0.shape[1]), requires_grad = not volatile).to(device)
     frames = []
-    
+
     # p = p_0_var
     # q = q_0_var
 
@@ -218,7 +218,7 @@ def leapfrog_stack(p_0, q_0, Func, T, dt, volatile=True, is_Hamilt=True, device=
     q = q_0
     p.requires_grad_()
     q.requires_grad_()
-    
+
     if is_Hamilt:
         accel = calculate_acceleration(p, q, Func)
 
@@ -567,7 +567,7 @@ def plot_animation(n_v, n_h, simulated_traj, true_traj=None, plot_true_data = Fa
                 ax_2.collections.remove(wframe_2)
             Z_2 = (true_traj[k, :]).view(n_v, n_h).data.numpy()
 
-            wframe_2 = ax_2.plot_wireframe(X, Y, Z_2, rstride=1, cstride=1)   
+            wframe_2 = ax_2.plot_wireframe(X, Y, Z_2, rstride=1, cstride=1)
 
         plt.pause(.01)
 
@@ -599,7 +599,7 @@ def plot_chain_animation(chain_length, simulated_traj, true_traj=None, plot_true
                 ax_2.collections.remove(wframe_2)
             Z_2 = (true_traj[k, :]).view(1, chain_length).data.numpy()
 
-            wframe_2 = ax_2.plot_wireframe(X, Y, Z_2, rstride=1, cstride=1)   
+            wframe_2 = ax_2.plot_wireframe(X, Y, Z_2, rstride=1, cstride=1)
 
         plt.pause(.01)
 
@@ -637,7 +637,7 @@ class QuadHamilt(nn.Module):
     def __init__(self):
         super(QuadHamilt, self).__init__()
         self.k = nn.Parameter(torch.rand(1))
-    
+
     def forward(self, p, q):
         return 0.5 * p.pow(2).sum(dim=1) + self.k * 0.5 * q.pow(2).sum(dim=1)
 
@@ -647,7 +647,7 @@ class MLP_QuadKinetic_Hamilt(nn.Module):
         super(MLP_QuadKinetic_Hamilt, self).__init__()
         self.linear1 = nn.Linear(input_size, n_hidden)
         self.linear2 = nn.Linear(n_hidden, 1)
-    
+
     def potential_energy(self, q):
         h_pre = self.linear1(q)
         h = h_pre.tanh_()
@@ -656,7 +656,7 @@ class MLP_QuadKinetic_Hamilt(nn.Module):
     def forward(self, p, q):
         return 0.5 * p.pow(2).sum(dim=1, keepdim=True) + self.potential_energy(q)
 
-## learns the Hamiltonian via MLP; assumes that the Hamiltonian is separable, but both the kinetic and the potential energy are unknown and learned via MLP 
+## learns the Hamiltonian via MLP; assumes that the Hamiltonian is separable, but both the kinetic and the potential energy are unknown and learned via MLP
 class MLP_Separable_Hamilt(nn.Module):
     def __init__(self, n_hidden, input_size):
         super(MLP_Separable_Hamilt, self).__init__()
@@ -671,7 +671,7 @@ class MLP_Separable_Hamilt(nn.Module):
         h_pre = self.linear_K1(p)
         h = h_pre.tanh_()
         return self.linear_K2(h)
-    
+
     def potential_energy(self, q):
         h_pre = self.linear_P1(q)
         h = h_pre.tanh_()
@@ -691,7 +691,7 @@ class PlainRNN(nn.Module):
         self.i2h = nn.Linear(input_size, hidden_size)
         self.h2h = nn.Linear(hidden_size, hidden_size)
         self.h2o = nn.Linear(hidden_size, output_size)
-        
+
     def forward(self, x_0, T):
         x_0_var = Variable(x_0)
         batch_size = x_0.shape[0]
@@ -727,7 +727,7 @@ class NaiveMLP(nn.Module):
 
         self.i2h = nn.Linear(input_size, hidden_size)
         self.h2o = nn.Linear(hidden_size, output_size)
-        
+
     def forward(self, x_0, T):
         #print ('T ', T)
         if (T == 0):
@@ -771,7 +771,7 @@ class myLSTM(nn.Module):
         self.h2gi = nn.Linear(hco_size, hco_size)
         self.h2go = nn.Linear(hco_size, hco_size)
         self.h2cp = nn.Linear(hco_size, hco_size)
-        
+
     def forward(self, x_0, T):
         x_0_var = Variable(x_0)
         batch_size = x_0.shape[0]
@@ -836,82 +836,6 @@ class MLPTimeDrvt_Separable(nn.Module):
         x_output = torch.cat([self.hp2op(hidden_p), self.hq2oq(hidden_q)], dim=1)
         return x_output
 
-## Dynamic time warping loss, implemented in the way on Wikipedia
-def dtw_loss(true_traj, pred_traj):
-    def mse(v, w):
-        return np.mean(np.power(v.numpy() - w.numpy(), 2))  
-    T = true_traj.shape[0]
-    S = pred_traj.shape[0]
-    # W = 0 / (T-1)
-    W = 0
-    arr = np.zeros([S, T])
-    arr[0, 0] = mse(true_traj[0, :], pred_traj[0, :])
-    for t in range(T - 1):
-        arr[0, t+1] = np.inf
-    for s in range(S - 1):
-        arr[s+1, 0] = np.inf
-    for s in range(S - 1):
-        for t in range(T - 1):
-            arr[s+1, t+1] = min(arr[s, t], arr[s, t+1], arr[s+1, t]) + mse(true_traj[t+1, :], pred_traj[s+1, :])
-    min_loss = np.min(arr[:, T-1]) / T
-    Tau = np.argmin(arr[:, T-1]) + 1
-    return min_loss, Tau
-
-
-## Also a loss function with dynamic time warping (implemented in my own way (a more complicated way...))
-def loss_dp(true_traj, pred_traj):
-    def mse(v, w):
-        # return np.mean(np.power(v - w, 2))
-        n = v.shape[0]
-        sos = 0
-        for i in range(n):
-            element = v[i]-w[i]
-            sos += pow(element, 2)
-        sos = sos / n
-        return sos
-    # mse = mean_squared_error
-    T = true_traj.shape[0]
-    S = pred_traj.shape[0]
-    # W = 0 / (T-1)
-    W = 0
-    arr = np.zeros([S, T])
-    arr[0, 0] = mse(true_traj[0, :], pred_traj[0, :])
-    for t in range(T - 1):
-        arr[0, t+1] = np.inf
-    for s in range(S - 1):
-        arr[s+1, 0] = np.inf
-    arr[1, 1] = arr[0, 0] + mse(true_traj[1, :], pred_traj[1, :])
-    for t in range(T - 2):
-        num_1 = arr[0, t] + mse(true_traj[t+1, :], (pred_traj[0, :] + pred_traj[1, :])/2) + mse(true_traj[t+2, :], pred_traj[1, :]) + W*2
-        num_2 = arr[0, t+1] + mse(true_traj[t+2, :], pred_traj[1, :])
-        arr[1, t+2] = min(num_1, num_2)
-    for s in range(S - 2):
-        # num_3 = arr[s, 0] + mse(true_traj[s+2, :], pred_traj[1, :]) + W
-        num_3 = arr[s, 0] + mse(true_traj[1, :], pred_traj[s+2, :]) + W
-        num_4 = arr[s+1, 0] + mse(true_traj[1, :], pred_traj[s+2, :])
-        arr[s+2, 1] = min(num_3, num_4)
-    for s in range(S - 2):
-        for t in range(T - 2):
-            num_1 = arr[s+1, t+1]
-            num_2 = arr[s+1, t] + mse(true_traj[t+1, :], (pred_traj[s+1, :] + pred_traj[s+2, :])/2) + W*2
-            num_3 = arr[s, t+1] + W
-            arr[s+2, t+2] = min(num_1, num_2, num_3) + mse(true_traj[t+2, :], pred_traj[s+2, :])
-    min_loss = np.min(arr[:, T-1]) / T
-    Tau = np.argmin(arr[:, T-1]) + 1
-    return min_loss, Tau
-
-## A helper function, which calls one of the two dtw loss functions above
-def time_elastic_loss(data, predicted, dtw=True):
-    batch_size = data.shape[1]
-    loss_arr = np.zeros(batch_size)
-    for index in range(batch_size):
-        true_traj = data[:, index, :]
-        pred_traj = predicted[:, index, :]
-        if dtw:
-            loss_arr[index] = dtw_loss(true_traj, pred_traj)[0]
-        else:
-            loss_arr[index] = loss_dp(true_traj, pred_traj)[0]
-    return loss_arr
 
 def mse_loss(data, predicted):
     batch_size = data.shape[1]
@@ -920,35 +844,10 @@ def mse_loss(data, predicted):
         true_traj = data[:, index, :]
         pred_traj = predicted[:, index, :]
         loss_arr[index] = np.mean(pow(true_traj.data.numpy() - pred_traj.data.numpy(), 2))
-    return loss_arr    
-
-## tests the loss function
-def testLossFunc():
-    # true_traj = np.arange(5)
-    # pred_traj = np.arange(5)
-    k_true = 5
-    m_true = 1
-    # n_samples = 2000
-    n_samples = 2
-    T = 100
-    dt = 0.1
-    lr = 5 * 1e-3
-    n_hidden=128
-    n_v = 3
-    n_h = 5
-    data = create_spring_lattice_dataset(leap=True, n=1, T=T*2, dt=dt/2, k=k_true, m = m_true, n_v = n_v, n_h = n_h, coarsen=False)
-    true_traj = data[np.arange(T) * 2, :, :]
-    true_traj = true_traj[:, 0, :]
-     # pred_traj = data[:, 0, :] + torch.randn(data.shape[0], data.shape[2])/10
-    pred_traj = data[:, 0, :]
-    # pred_traj[:T, :] = true_traj
-    # for s in range(len(pred_traj)):
-        # pred_traj[s, :] = 10000
-    return loss_dp(true_traj, pred_traj)
+    return loss_arr
 
 
-
-## training 
+## training
 
 def train(data, system_type, method, T, batch_size, n_epochs, n_samples, dt, lr, n_hidden, n_v=1, n_h=1, chain_length=20, know_p_0=True):
 
@@ -968,7 +867,7 @@ def train(data, system_type, method, T, batch_size, n_epochs, n_samples, dt, lr,
         model = MLP_Separable_Hamilt(n_hidden, dim)
     elif (method == 6):
         model = MLPTimeDrvt_Separable(2 * dim, n_hidden)
-    
+
     mse = nn.MSELoss()
 
     q_0 = data[0, :, dim:]
@@ -1021,7 +920,7 @@ def train(data, system_type, method, T, batch_size, n_epochs, n_samples, dt, lr,
                     else:
                         trajectory_simulated = model(torch.cat([p_0_var_permed[i:(i+batch_size), :].data, q_0_var_permed[i:(i+batch_size), :].data], 1), max_t)
 
-                ## If we know both the true p trajectory and the true q trajectory: 
+                ## If we know both the true p trajectory and the true q trajectory:
                 # error_total = mse(trajectory_simulated[:max_t, :, :], Variable(batch))
                 # error_total.backward()
                 ## If we only know the true q trajectory:
@@ -1033,7 +932,7 @@ def train(data, system_type, method, T, batch_size, n_epochs, n_samples, dt, lr,
                     torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
 
                 opt.step()
-                
+
                 print(epoch, i, max_t, error_total.data[0])
 
     if know_p_0:
@@ -1084,7 +983,7 @@ def test(test_data, model, system_type, method, T_test, n_test_samples, dt, n_v=
 
     mse = nn.MSELoss()
     test_error = mse(trajectory_predicted[:T_test, :, :], Variable(test_data))
-    print ('MSE avg test error', test_error.data[0]) 
+    print ('MSE avg test error', test_error.data[0])
     mse_arr = mse_loss(trajectory_predicted[:T_test, :, :], Variable(test_data))
     np.save(experiment + str(T_test) + '_mse', mse_arr)
     print ('MSE arr', mse_arr)
@@ -1123,7 +1022,7 @@ def main():
     # lr = 1e-1
     n_hidden=128  ## number of hidden units in the MLP's or RNN's
     n_samples = 2000  ## number of training samples
-    # n_samples = 32  
+    # n_samples = 32
     n_test_samples = 30  ## number of testing samples
     T_test = 1000  ## time length of testing samples
     know_p_0 = False
@@ -1131,22 +1030,18 @@ def main():
     #### Training the models and making the predictions
 
     ## List of systems to be learned
-    system_lst = ['pend', '3by5fb', 'sc20']
-    # system_lst = ['3by5fb']
-    ## 'pend': pendulum
-    ## '3by5fb': 3-by-5 spring lattice with fixed boundaries 
-    ## 'sc20': spring chain
+    system_lst = ['sc20']
 
     for system_type in range(len(system_lst)):
-        data_npy = np.load('./data/combined_data_' + str(system_lst[system_type]) + '_' + str(dataset_index) + '.npy') 
+        data_npy = np.load('./data/combined_data_' + str(system_lst[system_type]) + '_' + str(dataset_index) + '.npy')
 
         train_data = torch.from_numpy(data_npy[:T, :, :])
         test_data = torch.from_numpy(data_npy[T:, :n_test_samples, :])
 
-        for method in range(6): 
+        for method in range(6):
         ## 0: Leapfrog with MLP Hamiltonian
-        ## 1: Leapfrog with MLP Time Derivative 
-        ## 2: MLP for predicting p_{t+1}, q_{t+1} from p_t, q_t 
+        ## 1: Leapfrog with MLP Time Derivative
+        ## 2: MLP for predicting p_{t+1}, q_{t+1} from p_t, q_t
         ## 3: RNN
         ## 4: LSTM
         ## 5: Leapfrog with MLP for Separable Hamiltonian
@@ -1154,12 +1049,12 @@ def main():
             ## Training the model
             ## Case 1: p_0 is known
             # model = train(train_data, system_type=system_type, method=method, T=T, batch_size=batch_size, n_epochs=n_epochs, n_samples=n_samples, dt=dt, lr=lr, n_hidden=n_hidden, n_v=n_v, n_h=n_h, chain_length=chain_length, know_p_0=True)
-            ## Case 2: p_0 is not known and has to be learned for each trajectory 
+            ## Case 2: p_0 is not known and has to be learned for each trajectory
             model, p_0_var = train(train_data, system_type=system_type, method=method, T=T, batch_size=batch_size, n_epochs=n_epochs, n_samples=n_samples, dt=dt, lr=lr, n_hidden=n_hidden, n_v=n_v, n_h=n_h, chain_length=chain_length, know_p_0=False)
 
             ## Saving the model
             torch.save(model, './models/model_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index))
-            
+
             ## Predicting the test trajectories
             ## Case 1: p_0 of the trajectories is known
             # traj_pred = predict(test_data, model=model, system_type=system_type, method=method, T_test=T_test, n_test_samples=n_test_samples, dt=dt, n_v = n_v, n_h = n_h, chain_length=chain_length, know_p_0 = True)

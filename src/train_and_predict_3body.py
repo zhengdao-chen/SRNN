@@ -365,7 +365,7 @@ def train_initasparam(data, system_type, method, T, batch_size, n_epochs, n_samp
 
                 # if (method == 3) or (method == 4):
                 #     trajectory_simulated = model(torch.cat([p_0, q_0], 1), max_t)
-                # else:  
+                # else:
                 trajectory_simulated = numerically_integrate(integrator=integrator_train, p_0=p_0, q_0=q_0, model=model, method=method, T=max_t, dt=dt, volatile=False, device=device, coarsening_factor=1)
 
                 # else:
@@ -385,7 +385,7 @@ def train_initasparam(data, system_type, method, T, batch_size, n_epochs, n_samp
                 ## If we know both the true p trajectory and the true q trajectory:
                 # print (i, z_0_batch.requires_grad)
                 error_total = mse(trajectory_simulated[:max_t, :, :], batch[:max_t, :, :])
-                
+
                 ## If we only know the true q trajectory:
                 # error_total = mse(trajectory_simulated[:max_t, :, dim:], Variable(batch[:, :, dim:]))
 
@@ -525,7 +525,7 @@ def predict_initasparam(test_data_init_seq, model, method, T_test, n_test_sample
     T_init_seq = test_data_init_seq.size(0)
 
     z_0_npy = test_data_init_seq[0, :n_test_samples, :].to('cpu').numpy()
-    
+
     # z_0 = z_0.to(device)
 
     # print (device)
@@ -565,7 +565,7 @@ def predict_initasparam(test_data_init_seq, model, method, T_test, n_test_sample
         print ('diff', np.mean(np.abs(z_0_npy - z_0_npy_new)))
         z_0_npy = z_0_npy_new.astype(np.float32).copy()
 
-    z_0 = torch.from_numpy(z_0_npy).to(device) 
+    z_0 = torch.from_numpy(z_0_npy).to(device)
 
     # else:
     #     dim = int(z_0.shape[2] / 2)
@@ -633,12 +633,12 @@ def main():
     train_noise_level = args.train_noise_level
     test_noise_level = args.test_noise_level
     if (train_noise_level > 0):
-    	dataset_index = noiseless_dataset_index + 'n' + str(train_noise_level)    
+    	dataset_index = noiseless_dataset_index + 'n' + str(train_noise_level)
     else:
     	dataset_index = noiseless_dataset_index# + '_cf100'
     if (test_noise_level > 0):
         test_dataset_index = noiseless_dataset_index + 'n' + str(test_noise_level)
-    else: 
+    else:
         test_dataset_index = noiseless_dataset_index #+ '_cf100'
     # run_index = 'r9'
     run_index = args.run_index
@@ -733,8 +733,8 @@ def main():
     #### Training the models and making the predictions
 
     data_dir = './data/3body'
-    model_dir = '../models/3body_' + str(dataset_index) + str(run_index) #'/data/chenzh/learningphysics/models/chain_' + str(dataset_index) + str(run_index)
-    pred_dir = '../predictions/3body_' + str(dataset_index) + str(run_index) #'/data/chenzh/learningphysics/predictions/chain_' + str(dataset_index) + str(run_index)
+    model_dir = '../models/3body_' + str(dataset_index) + str(run_index)
+    pred_dir = '../predictions/3body_' + str(dataset_index) + str(run_index)
     log_dir_together = '../logs/3body_' + str(dataset_index) + str(run_index)
 
     if (not os.path.isdir(data_dir)):
@@ -765,16 +765,6 @@ def main():
     print(vars(args))
 
     for system_type in range(len(system_lst)):
-        # data_npy = np.load('./data/combined_data_' + str(system_lst[system_type]) + '_' + str(dataset_index) + '.npy')
-        # data_npy = np.load('./data/combined_data_filtered_1p2d_' + str(dataset_index) + '_081718_th1.npy')
-        # data_npy = np.load('./data/combined_data_1p2d_C_cf1000_newlf.npy')
-        # data_npy = np.load('./data/combined_data_filtered_1p2d_D_081718_th0.01.npy')
-        # data_npy = np.load('/home/chenzh/Documents/LBPY/learningphysics/src/data/combined_data_1p2d_' + str(dataset_index) + '_dt' + str(dt) + '_cf1000_newlf.npy')
-        # data_npy = np.load(data_dir + '/combined_data_sc20_' + dataset_index + '.npy')
-
-        # train_data = torch.from_numpy(data_npy[:T, :, :])
-        # init_test_data = train_data[0, :n_test_samples, :]
-
 
         train_data_npy = np.load(data_dir + '/train_data_3body_' + dataset_index + '.npy')
         test_data_npy = np.load(data_dir + '/test_data_3body_' + test_dataset_index  + '.npy')
@@ -800,7 +790,7 @@ def main():
             # for i in range(T - T_short + 1):
                 train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i * (T_short) : (i+1) * T_short, :n_samples, :]
                 # train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i : i + T_short, :n_samples, :]
-        
+
             train_data = train_data_shortened
             T = T_short
             n_samples = train_data_shortened.shape[1]
@@ -811,7 +801,7 @@ def main():
             for i in range(T - max(T_short, T_init_seq) + 1):
                 # train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i * (T_short) : (i+1) * T_short, :n_samples, :]
                 train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i : i + max(T_short, T_init_seq), :n_samples, :]
-        
+
             train_data = train_data_shortened
             T = T_short
             n_samples = train_data_shortened.shape[1]
@@ -888,10 +878,6 @@ def main():
                 np.save(pred_out_string + '.npy', traj_pred.cpu().data.numpy())
             else:
                 ## Saving the predicted trajectories
-                # np.save('./predictions/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/081718_noim1p2d_2_th1/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/082018_noim1p2d_D_2/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/082218_noim1p2d_' + str(dataset_index) + '/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
                 np.save(pred_out_string + '.npy', traj_pred.data.numpy())
 
             print ('done saving the predicted trajectory')
@@ -899,4 +885,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

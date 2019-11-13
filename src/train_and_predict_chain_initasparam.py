@@ -363,7 +363,7 @@ def train_initasparam(data, system_type, method, T, batch_size, n_epochs, n_samp
 
                 # if (method == 3) or (method == 4):
                 #     trajectory_simulated = model(torch.cat([p_0, q_0], 1), max_t)
-                # else:  
+                # else:
                 trajectory_simulated = numerically_integrate(integrator=integrator_train, p_0=p_0, q_0=q_0, model=model, method=method, T=max_t, dt=dt, volatile=False, device=device, coarsening_factor=1)
 
                 # else:
@@ -383,7 +383,7 @@ def train_initasparam(data, system_type, method, T, batch_size, n_epochs, n_samp
                 ## If we know both the true p trajectory and the true q trajectory:
                 # print (i, z_0_batch.requires_grad)
                 error_total = mse(trajectory_simulated[:max_t, :, :], batch[:max_t, :, :])
-                
+
                 ## If we only know the true q trajectory:
                 # error_total = mse(trajectory_simulated[:max_t, :, dim:], Variable(batch[:, :, dim:]))
 
@@ -434,16 +434,7 @@ def train_initasparam(data, system_type, method, T, batch_size, n_epochs, n_samp
 
             alpha = T * 0
             if (max_iters_init_train > 0) and (epoch > 100):# and (epoch % 5 == 0):
-                print ('muha')
-                # for j in range(n_samples):
-                #     objective = PyTorchObjective(data[:, j, :], model, dim, integrator=integrator_train, T=T, dt=dt, device=device, method=method, alpha=alpha)
-                #     print (z_0_npy.shape)
-                #     result = minimize(objective.fun_reg, z_0_npy[j, :], method='L-BFGS-B', jac=objective.jac_reg,
-                #          options={'gtol': 1e-6, 'disp': False,
-                #         'maxiter':10})
-                #     print ('old', z_0_npy[j, :], 'new', result.x)
-                #     print ('diff', z_0_npy[j, :] - result.x)
-                #     z_0_npy[j, :] = result.x
+
                 objective = PyTorchObjective(data[:T, :, :].detach(), model, dim, integrator=integrator_train, T=T, dt=dt, device=device, method=method, alpha=alpha, z_0_old=z_0_npy)
                 z_0_unrolled_npy = z_0_npy.reshape(n_samples * dim * 2)
                 result = minimize(objective.fun_batch, z_0_unrolled_npy, method='L-BFGS-B', jac=objective.jac_batch,
@@ -523,27 +514,7 @@ def predict_initasparam(test_data_init_seq, model, method, T_test, n_test_sample
     T_init_seq = test_data_init_seq.size(0)
 
     z_0_npy = test_data_init_seq[0, :n_test_samples, :].to('cpu').numpy()
-    
-    # z_0 = z_0.to(device)
 
-    # print (device)
-    # print (z_0.device)
-
-    # z_0.requires_grad_()
-
-    # print (z_0.device)
-
-    # opt_init = torch.optim.Adam([z_0], lr=lr_init)
-
-
-    # mse = nn.MSELoss()
-
-    # for epoch in range(n_epochs_train_init):
-    #     trajectory_simulated = numerically_integrate(integrator=integrator, p_0=z_0[:, :dim], q_0=z_0[:, dim:], model=model, method=method, T=T_init_seq, dt=dt, volatile=False, device=device)
-    #     error = mse(trajectory_simulated, test_data_init_seq.requires_grad_())
-    #     error.backward()
-    #     opt_init.step()
-    # for i in range(n_epochs_train_init):
 
     if (max_iters_init > 0):
         alpha=T_test * 0
@@ -563,58 +534,8 @@ def predict_initasparam(test_data_init_seq, model, method, T_test, n_test_sample
         print ('diff', np.mean(np.abs(z_0_npy - z_0_npy_new)))
         z_0_npy = z_0_npy_new.astype(np.float32).copy()
 
-    z_0 = torch.from_numpy(z_0_npy).to(device) 
+    z_0 = torch.from_numpy(z_0_npy).to(device)
 
-    # else:
-    #     dim = int(z_0.shape[2] / 2)
-    #     z_0 = z_0[:n_test_samples, :]
-    #     z_0.to(device)
-
-    # # if (torch.cuda.is_available()):
-    # #     if (not ((method == 2) or (method == 3) or (method==4))):
-    # #         test_data_init_seq = test_data_init_seq.cuda()
-
-    # # seq2init.nbatch = test_data_init_seq.size(1)
-    # # h = seq2init.initHidden().to(device)
-    # # for t in reversed(range(seq2init_length)):
-    # #     obs = test_data_init_seq[t, :, :]
-    # #     out, h = seq2init.forward(obs, h)
-
-    # p_0 = z_0[:, :dim]
-    # q_0 = z_0[:, dim:]
-
-    # # q_0 = init_state[:, dim:]
-    # # if know_p_0:
-    # #     # p_0 = test_data[0, :, :dim]
-    # #     p_0 = init_state[:, :dim]
-    # # else:
-    # #     p_0 = p_0_pred
-
-    # # if (method == 0 or method == 5 or method == 7 or method == 9):
-    # #     if coarsen:
-    # #         coarsening_factor = 10
-    # #         if lf:
-    # #             fine_trajectory = leapfrog(p_0, q_0, model, T_test * coarsening_factor, dt / coarsening_factor, volatile=False, device=device)
-    # #         else:
-    # #             fine_trajectory = euler(p_0, q_0, model, T_test * coarsening_factor, dt / coarsening_factor, volatile=False, device=device)
-    # #         trajectory_predicted = fine_trajectory[np.arange(T_test) * coarsening_factor, :, :]
-    # #     else:
-    # #         if lf:
-    # #             trajectory_predicted = leapfrog(p_0, q_0, model, T_test, dt, volatile=False, device=device)
-    # #         else:
-    # #             trajectory_predicted = euler(p_0, q_0, model, T_test, dt, volatile=False, device=device)
-    # # elif (method == 1 or method == 6 or method == 8 or method == 10):
-    # #     if lf:
-    # #         trajectory_predicted = leapfrog(p_0, q_0, model, T_test, dt, volatile=False, is_Hamilt=False, device=device)
-    # #     else:
-    # #         trajectory_predicted = euler(p_0, q_0, model, T_test, dt, volatile=False, is_Hamilt=False, device=device)
-    # # else:
-    # #     # trajectory_predicted = model(test_data[0, :, :], T_test * 2)
-    # #     trajectory_predicted = model(torch.cat([p_0, q_0], 1), T_test)
-
-    # if (method == 3) or (method == 4):
-    #     trajectory_predicted = model(z_0, T_test)
-    # else:
     trajectory_predicted = numerically_integrate(integrator=integrator, p_0=z_0[:, :dim], q_0=z_0[:, dim:], model=model, method=method, T=T_test, dt=dt, volatile=True, device=device, coarsening_factor=coarsening_factor)
 
     return trajectory_predicted
@@ -631,12 +552,12 @@ def main():
     train_noise_level = args.train_noise_level
     test_noise_level = args.test_noise_level
     if (train_noise_level > 0):
-    	dataset_index = noiseless_dataset_index + 'n' + str(train_noise_level)    
+    	dataset_index = noiseless_dataset_index + 'n' + str(train_noise_level)
     else:
     	dataset_index = noiseless_dataset_index + '_cf100'
     if (test_noise_level > 0):
         test_dataset_index = noiseless_dataset_index + 'n' + str(test_noise_level)
-    else: 
+    else:
         test_dataset_index = noiseless_dataset_index + '_cf100'
     # run_index = 'r9'
     run_index = args.run_index
@@ -667,15 +588,7 @@ def main():
     # n_hidden=256  ## number of hidden units in the MLP's or RNN's
     # n_hidden = 16
     n_hidden = args.n_hidden
-    # n_samples = 2000  ## number of training samples
-    # n_samples = 512
-    # n_samples = 448
-    # n_samples = 384
-    # n_samples = 944
-    # n_samples = 32
-    # n_samples = 1024
-    # n_samples = 1024
-    # n_samples = 1000
+
     n_samples = args.n_samples
     # n_test_samples = 30  ## number of testing samples
     n_test_samples = 32
@@ -731,8 +644,8 @@ def main():
     #### Training the models and making the predictions
 
     data_dir = './data/chain'
-    model_dir = '../models/chain_' + str(dataset_index) + str(run_index) #'/data/chenzh/learningphysics/models/chain_' + str(dataset_index) + str(run_index)
-    pred_dir = '../predictions/chain_' + str(dataset_index) + str(run_index) #'/data/chenzh/learningphysics/predictions/chain_' + str(dataset_index) + str(run_index)
+    model_dir = '../models/chain_' + str(dataset_index) + str(run_index)
+    pred_dir = '../predictions/chain_' + str(dataset_index) + str(run_index) )
     log_dir_together = '../logs/chain_' + str(dataset_index) + str(run_index)
 
     if (not os.path.isdir(data_dir)):
@@ -763,16 +676,6 @@ def main():
     print(vars(args))
 
     for system_type in range(len(system_lst)):
-        # data_npy = np.load('./data/combined_data_' + str(system_lst[system_type]) + '_' + str(dataset_index) + '.npy')
-        # data_npy = np.load('./data/combined_data_filtered_1p2d_' + str(dataset_index) + '_081718_th1.npy')
-        # data_npy = np.load('./data/combined_data_1p2d_C_cf1000_newlf.npy')
-        # data_npy = np.load('./data/combined_data_filtered_1p2d_D_081718_th0.01.npy')
-        # data_npy = np.load('/home/chenzh/Documents/LBPY/learningphysics/src/data/combined_data_1p2d_' + str(dataset_index) + '_dt' + str(dt) + '_cf1000_newlf.npy')
-        # data_npy = np.load(data_dir + '/combined_data_sc20_' + dataset_index + '.npy')
-
-        # train_data = torch.from_numpy(data_npy[:T, :, :])
-        # init_test_data = train_data[0, :n_test_samples, :]
-
 
         train_data_npy = np.load(data_dir + '/train_data_chain_' + dataset_index + '.npy')
         test_data_npy = np.load(data_dir + '/test_data_chain_' + test_dataset_index  + '.npy')
@@ -787,7 +690,7 @@ def main():
             # for i in range(T - T_short + 1):
                 train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i * (T_short) : (i+1) * T_short, :n_samples, :]
                 # train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i : i + T_short, :n_samples, :]
-        
+
             train_data = train_data_shortened
             T = T_short
             n_samples = train_data_shortened.shape[1]
@@ -798,17 +701,13 @@ def main():
             for i in range(T - max(T_short, T_init_seq) + 1):
                 # train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i * (T_short) : (i+1) * T_short, :n_samples, :]
                 train_data_shortened[:, i * n_samples : (i+1) * n_samples, :] = train_data[i : i + max(T_short, T_init_seq), :n_samples, :]
-        
+
             train_data = train_data_shortened
             T = T_short
             n_samples = train_data_shortened.shape[1]
 
             print ('new num samples', n_samples)
 
-
-        # init_test_data = test_data[0, :, :]
-
-        # for method in [8, 10, 5, 7, 1, 4, 3]:
         for method in [5, 1]:
         ## 0: Leapfrog with MLP Hamiltonian
         ## 1: Leapfrog with MLP Time Derivative
@@ -875,10 +774,6 @@ def main():
                 np.save(pred_out_string + '.npy', traj_pred.cpu().data.numpy())
             else:
                 ## Saving the predicted trajectories
-                # np.save('./predictions/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/081718_noim1p2d_2_th1/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/082018_noim1p2d_D_2/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
-                # np.save('/data/chenzh/learningphysics/predictions/082218_noim1p2d_' + str(dataset_index) + '/traj_pred_' + str(system_lst[system_type]) + '_' + str(method) + '_' + str(dataset_index) + '_' + str(run_index) + '.npy', traj_pred.data.numpy())
                 np.save(pred_out_string + '.npy', traj_pred.data.numpy())
 
             print ('done saving the predicted trajectory')
@@ -886,4 +781,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
