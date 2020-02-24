@@ -1,5 +1,7 @@
 # SRNN
-Code for the paper [*Symplectic Recurrent Neural Networks*](https://arxiv.org/abs/1909.13334), accepted by ICLR 2020
+Code for the paper [*Symplectic Recurrent Neural Networks*](https://arxiv.org/abs/1909.13334), accepted by ICLR 2020. 
+
+By unrolling a Hamiltonian system with a neural-network-parametrized Hamiltonian function using the leapfrog integrator, and together with initial state optimization, our model is able to learn the dynamics of complex, noisy and stiff physical systems.
 
 ## Dependencies
 Python 3.7
