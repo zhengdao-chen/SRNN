@@ -1,4 +1,10 @@
- python run_experiments.py \
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+# Earlier versions of this file were written by Zhengdao Chen, used with permission.
+
+python run_experiments.py \
  --system_type '3body' \
  --noiseless_dataset_index 'A' \
  --train_noise_level 0 \
