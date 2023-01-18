@@ -16,6 +16,8 @@ Numpy 1.18
 Scipy 1.4
 
 ## Usage
+Run `python generate_data.py` to generate the datasets
+
 Run `script_chain_new` for the spring-chain experiment
 
 Run `script_3body_new` for the three-body experiment
